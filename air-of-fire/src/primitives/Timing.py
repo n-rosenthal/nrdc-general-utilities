@@ -9,7 +9,6 @@ It provides an interface for manipulating astrological and planetary data.
 from dataclasses import dataclass;
 from datetime import datetime;
 from zoneinfo import ZoneInfo;
-from air-of-fire.src.primitives.Timing import Timing
 
 
 #   Useful constants
@@ -49,7 +48,7 @@ def check_planetary_hour_duration(start: datetime, end: datetime) -> bool:
     """
     try:
         planetary_hour_duration = Duration(start, end);
-        return planetary_hour_duration >= HOUR_LENGTH * 2;
+        return planetary_hour_duration() <= (HOUR_LENGTH * 2);
     except ValueError:
         return False;
 
@@ -98,27 +97,44 @@ class Timing:
         
     @staticmethod
     def from_dict(data):
+        print(data);
+        
         return Timing(
-            datetime.fromisoformat(data["start"]),
-            datetime.fromisoformat(data["end"])
+            data["start"],
+            data["end"]
         );
         
     @staticmethod
-    def from_csv(data):
+    def from_csv(data:str):
+        data = data.split(",");
         return Timing(
             datetime.fromisoformat(data[0]),
             datetime.fromisoformat(data[1])
         );
         
     @staticmethod
-    def from_xml(data):
+    def from_xml(data:str):
+        data = data.split("<timing>");
         return Timing(
-            datetime.fromisoformat(data.find("start").text),
-            datetime.fromisoformat(data.find("end").text)
+            datetime.fromisoformat(data[1].split("<start>")[1]),
+            datetime.fromisoformat(data[1].split("<end>")[1])
         );
         
 class Duration(Timing):
+    """A `Duration` is a subclass of `Timing` that represents a time interval.
+    It provides a duration attribute that represents the difference between the start and end times.
+    
+    @author nrosenthal
+    @version 1.0
+    @since 2024-10-29
+    """
     def __init__(self, start:datetime, end:datetime):
+        """
+        Initializes a `Duration` object with the given `start` and `end` timestamps.
+        
+        @param start: The start timestamp of the `Duration` object.
+        @param end: The end timestamp of the `Duration` object.
+        """
         super().__init__(start, end);
         
     def __str__(self):
@@ -128,8 +144,33 @@ class Duration(Timing):
         return self.__str__();
     
     def __call__(self):
-        return super().__call__()[1] - super().__call__()[0];
+        """
+        Returns the duration of the `Duration` object in seconds.
+
+        This method calculates the total seconds between the start and end
+        times of the `Duration` object.
+
+        Returns:
+            float: The duration in seconds.
+        """
+        return (super().__call__()[1] - super().__call__()[0]).total_seconds();
     
+    def xml(self):
+        return f"<duration>{self.end - self.start}</duration>";
+    
+    def csv(self):
+        return f"{self.end - self.start}";
+    
+    def json(self):
+        return {
+            "duration": self.end - self.start
+        };
 
       
-        
+if __name__ == "__main__":
+    #   Timing tests
+    planetary_hour:Duration = Duration(datetime(2024, 10, 28, 0, 0, 0), datetime(2024, 10, 28, 2, 30, 0));
+    print(planetary_hour.csv());
+    
+    print(check_planetary_hour_duration(planetary_hour.start, planetary_hour.end));
+    
