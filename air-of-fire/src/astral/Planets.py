@@ -105,6 +105,8 @@ class Planets(Enum):
 CHALDEAN_ORDER:list[Planets] = [Planets.SUN, Planets.MOON, Planets.MERCURY, Planets.VENUS, Planets.MARS, Planets.JUPITER, Planets.SATURN];
 """`CHALDEAN_ORDER` is a list of the planets in the Chaldean Order, that is, from the slowest to the fastest, as seen from the Earth. The Sun and the Moon are included as planets in this system."""
 
+WEEKDAY_TO_PLANET:dict[int, Planets] = {0: Planets.SUN, 1: Planets.MOON, 2: Planets.MERCURY, 3: Planets.VENUS, 4: Planets.MARS, 5: Planets.JUPITER, 6: Planets.SATURN};
+"""`WEEKDAY_TO_PLANET` is a dictionary that maps each weekday to the corresponding planet in the Chaldean Order."""
 
 
 #   Translation functions
@@ -298,7 +300,41 @@ class PlanetaryHours(list):
             hours.append(PlanetaryHour.from_json(row));
         return PlanetaryHours(*hours);
         
-        
+def getPlanetaryHours(sunrise: datetime, sunset: datetime) -> PlanetaryHours:
+    planetary_hours:list[PlanetaryHour] = [];
+    
+    day_hour_length = (sunset - sunrise) / 12;
+    night_hour_length = ((sunrise + timedelta(days=1)) - sunset) / 12;
+    
+    week_day:int    = sunrise.weekday();
+    planet_day:int  = WEEKDAY_TO_PLANET[week_day];
+    planet_index:int = planet_day.value;
+    
+    for i in range(12):
+        start = sunrise + (day_hour_length * i);
+        end = start + day_hour_length;
+        planetary_hours.append(PlanetaryHour(Planets.from_index(planet_index), start, end));
+        planet_index += 1;
+        if planet_index == 7:
+            planet_index = 1;
+    for i in range(12):
+        start = sunset + (night_hour_length * i);
+        end = start + night_hour_length;
+        planetary_hours.append(PlanetaryHour(Planets.from_index(planet_index), start, end));
+        planet_index += 1;
+        if planet_index == 7:
+            planet_index = 1;
+    return PlanetaryHours(*planetary_hours);
 
 if __name__ == "__main__":
-    print(Planets.from_index(1))
+    import datetime;
+    import json;
+    import time;
+    
+    start = time.time();
+    hours = getPlanetaryHours(datetime.datetime(2024, 10, 30, 6, 0, 0), datetime.datetime(2024, 10, 30, 18, 0, 0));
+    end = time.time();
+    print(end - start);
+    
+    
+    

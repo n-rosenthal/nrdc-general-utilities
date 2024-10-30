@@ -123,5 +123,3 @@ class ZodiacalPosition:
     
     def json(self):
         return {"zodiac":self.zodiac, "angle":self.angle};
-    
-    
