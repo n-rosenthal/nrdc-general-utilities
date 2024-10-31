@@ -148,16 +148,48 @@ class ZodiacalSky:
     def __repr__(self):
         return self.__str__();
 
+
+class AstralPosition:
+    """Implements a method for obtaining the current position of the Sun in the zodiac.
+    
+    @author nrosenthal
+    @version 1.0
+    @since 2024-10-30
+    """
+    def __init__(self, day: datetime):
+        """Initializes an `AstralPosition` object with the given `day`.
+        
+        Args:
+            day (datetime): The day to obtain the position of the Sun for.
+        """
+        self.day            = day;
+        self.angle: float   = None;
+        
+    def computeZodiacs(self) -> float:
+        """Computes the current position of the Sun in the zodiac.
+        """
+        return self.day.hour * 15 + self.day.minute * 0.25;
+    
+    def __str__(self):
+        return f"{self.angle}°";
+    
+    def __repr__(self):
+        return self.__str__();
+        
+        
+        
 ZODIACAL_SKY__30_10_2024:ZodiacalSky = ZodiacalSky(
-    PositionedPlanet(Planets.SUN, ZodiacalPosition(Zodiacs.SCORPIO,         8)),
-    PositionedPlanet(Planets.MOON, ZodiacalPosition(Zodiacs.LIBRA,          20)),
-    PositionedPlanet(Planets.MERCURY, ZodiacalPosition(Zodiacs.SCORPIO,     25)),
-    PositionedPlanet(Planets.VENUS, ZodiacalPosition(Zodiacs.SAGITTARIUS,   15)),
-    PositionedPlanet(Planets.MARS, ZodiacalPosition(Zodiacs.CANCER,         28)),
-    PositionedPlanet(Planets.JUPITER, ZodiacalPosition(Zodiacs.GEMINI,      20),     "retrograde"),
-    PositionedPlanet(Planets.SATURN, ZodiacalPosition(Zodiacs.PISCES,       12),     "retrograde"),
-);
+                PositionedPlanet(Planets.SUN, ZodiacalPosition(Zodiacs.SCORPIO,         8)),
+                PositionedPlanet(Planets.MOON, ZodiacalPosition(Zodiacs.LIBRA,          20)),
+                PositionedPlanet(Planets.MERCURY, ZodiacalPosition(Zodiacs.SCORPIO,     25)),
+                PositionedPlanet(Planets.VENUS, ZodiacalPosition(Zodiacs.SAGITTARIUS,   15)),
+                PositionedPlanet(Planets.MARS, ZodiacalPosition(Zodiacs.CANCER,         28)),
+                PositionedPlanet(Planets.JUPITER, ZodiacalPosition(Zodiacs.GEMINI,      20),     "retrograde"),
+                PositionedPlanet(Planets.SATURN, ZodiacalPosition(Zodiacs.PISCES,       12),     "retrograde"),
+            );
 
 
 if __name__ == "__main__":
     print(ZODIACAL_SKY__30_10_2024);
+    
+    print(AstralPosition(datetime.datetime(2024, 10, 30, 6, 31, 0)).computeZodiacs());

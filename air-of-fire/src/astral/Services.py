@@ -1,7 +1,7 @@
 import datetime;
 import Astral as astral;
 import Planets as planets;
-
+import Zodiacs as zodiacs;
 
 class ReportBuilder:
     """The `ReportBuilder` superclass is the base class for all report classes.
@@ -74,7 +74,32 @@ class ReportBuilder:
         """
         raise NotImplementedError;
     
-
+    def _setWeekdayData(self, day:datetime) -> None:
+        """Sets the data associated with the report for the given day of the week.
+        
+        This method should be implemented by all report classes.
+        It should set the data associated with the report for the given day of the week.
+        
+        @param day_of_week: The day of the week.
+        @type day_of_week: int
+        """
+        weekday: int = day.weekday();
+        
+        #   str representation
+        self.data["day_of_week"]            = day;
+        self.data["day_of_week_str"]        = day.strftime("%A");
+        self.data["day_of_week_short_str"]  = day.strftime("%a");
+        
+        #   as int
+        self.data["day_of_week_number"]     = weekday;
+        
+        #   planetary
+        self.data["planet"]                 = planets.Planets.from_weekday(weekday);
+        
+        #   astral
+        self.data["sky_position"]           = astral.SkyPosition(day, self.data["planet"]);
+        
+        
 
 class PlanetaryDayReport(ReportBuilder):
     """The `PlanetaryDayReport` class is a subclass of the `ReportBuilder` class.
@@ -130,6 +155,46 @@ class PlanetaryDayReport(ReportBuilder):
         self.data["day_of_week_number"] = day_of_week.weekday();
         self.data["day_planet"] = planets.Planets.from_weekday(day_of_week.weekday());
         
+class ZodiacalSkyReport(ReportBuilder):
+    """The `ZodiacalSkyReport` class is a subclass of the `ReportBuilder` class.
+    It provides the `generate_report` method that generates a report about the zodiacal sky of the given day.
+    
+    It accepts as constructor parameters
+        -   a `ZodiacalSky` object of `PositionedPlanet` objects
+    
+    @author nrosenthal
+    @version 1.0
+    @since 2024-10-29
+    """
+    def generate_report(self, *args) -> str:
+        #   Check if a `ZodiacalSky` object was provided
+        if len(args) == 1 and isinstance(args[0], astral.ZodiacalSky):
+            zodiacal_sky = args[0];
+        else:
+            raise ValueError("Invalid arguments");
         
+        #   Day of the week
+        day_str: str = zodiacal_sky.date.strftime("%Y-%m-%d");
+        
+        #   Generate the report
+        report: str = "\t" + "-"*56 + "\n";
+        report += f"\t\t{day_str}\t\t\t\t\t{self.data['day_of_week_str']} ({self.data["day_planet"]})\n\n";
+        report += f"\t\tplanet\t-\t end \t\t\tPlanetary Ruler\n" + "\t" + "-"*56 + "\n";
+        for zodiacal_planet in zodiacal_sky.planets:
+            report += f"\t\t{zodiacal_planet.start:%I:%M} \t-\t {zodiacal_planet.end:%I:%M}\t\t\t{zodiacal_planet.planet}\n";
+        report += "\t" + "-"*56 + "\n";
+        return report;
+    
+    def __init__(self, day: datetime) -> None:
+        self.data = {};
+        self.day = day;
+        
+        self.data["day_of_week"]            = day;
+        self.data["day_of_week_str"]        = day.strftime("%A");
+        self.data["day_of_week_short_str"]  = day.strftime("%a");
+        self.data["day_of_week_number"]     = day.weekday();
+
+    
+    
 if __name__ == "__main__":
     print(PlanetaryDayReport(datetime.datetime(2024, 10, 30)).generate_report((datetime.datetime(2024,10,30,6,0,0), datetime.datetime(2024,10,30,18,0,0))));
