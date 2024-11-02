@@ -188,6 +188,7 @@ def computeAngle(date:datetime.datetime) -> float:
     
     return (date - sign_start).total_seconds() * 360 / (sign_end - sign_start).total_seconds() + 8;
 
+
 def main():
     #   Module initalization:
     setSignsInterval();         #   Sets the global variable `CURR_YEAR` to the current year
