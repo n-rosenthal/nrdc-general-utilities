@@ -1,8 +1,10 @@
+import json;
+import xml;
+import csv;
+
 class Storable:
     """The Storable interface provides abstract methods for storing objects
     """
-    def __init__(self, *args):
-        self._args = args;
         
     def json(self) -> dict:
         pass;
@@ -12,3 +14,4 @@ class Storable:
     
     def csv(self) -> str:
         pass;
+
